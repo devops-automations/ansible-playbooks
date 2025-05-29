@@ -58,7 +58,11 @@
         nginx_branch: mainline
         nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
 
-    - role: nginx_config
+    - name: Include NGINX config role if NGINX version is set
+      include_role:
+        name: nginx_config
+      when: ec2_instance_tags.USERDATA_NGINX_VERSION is defined
+
       vars:
         nginx_config_files:
           - content: |
