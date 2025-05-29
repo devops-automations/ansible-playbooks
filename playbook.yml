@@ -1,0 +1,50 @@
+---
+- name: Install components based on EC2 tags
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    # Start Tasks to gather tags from metadata
+    - name: Get EC2 metadata token
+      shell: >
+        curl -X PUT "http://169.254.169.254/latest/api/token"
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 120"
+      register: imds_token
+      changed_when: false
+
+    - name: Get EC2 instance tag keys
+      shell: >
+        curl -H "X-aws-ec2-metadata-token: {{ imds_token.stdout }}"
+        -s http://169.254.169.254/latest/meta-data/tags/instance
+      register: ec2_tags_list
+      changed_when: false
+
+    - name: Get EC2 instance tag values
+      shell: >
+        curl -H "X-aws-ec2-metadata-token: {{ imds_token.stdout }}"
+        -s http://169.254.169.254/latest/meta-data/tags/instance/{{ item }}
+      loop: "{{ ec2_tags_list.stdout_lines }}"
+      register: ec2_tags_values
+      changed_when: false
+
+    - name: Build EC2 tags dictionary
+      set_fact:
+        ec2_instance_tags: >-
+          {{
+            dict(ec2_tags_values.results | zip(ec2_tags_list.stdout_lines) |
+            map('reverse') |
+            map('list') |
+            map('first') | zip(ec2_tags_values.results | map(attribute='stdout')))
+          }}
+
+    - name: Debug EC2 tags
+      debug:
+        var: ec2_instance_tags
+
+    # End Tasks to gather tags from metadata
+
+    - name: Include VictoriaMetrics role dynamically
+      include_role:
+        name: "victoria-metrics.{{ ec2_instance_tags.USERDATA_VICTORIA_METRICS }}"
+      when: ec2_instance_tags.USERDATA_VICTORIA_METRICS is defined
+
