@@ -8,3 +8,8 @@
   src: https://github.com/nginx/ansible-role-nginx
   version: main
   scm: git
+
+- name: nginx-config
+  src: https://github.com/nginx/ansible-role-nginx-config.git
+  version: main
+  scm: git

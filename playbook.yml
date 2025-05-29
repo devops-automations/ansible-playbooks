@@ -54,18 +54,24 @@
       when: ec2_instance_tags.USERDATA_NGINX_VERSION is defined
 
       vars:
+        nginx_type: opensource
+        nginx_branch: mainline
         nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
-        nginx_config:
-          content: |
-            server {
-                listen 80;
-                server_name _;
-                location / {
-                    proxy_pass http://localhost:8428;
-                    proxy_set_header Host $host;
-                    proxy_set_header X-Real-IP $remote_addr;
-                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                }
-            }
-          filename: victoria.conf
+
+    - role: nginx_config
+      vars:
+        nginx_config_files:
+          - content: |
+              server {
+                  listen 80;
+                  server_name _;
+                  location / {
+                      proxy_pass http://localhost:8428;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  }
+              }
+            filename: victoria.conf
+
 
