@@ -56,7 +56,7 @@
       vars:
         nginx_config_template_enable: true
         nginx_config_template:
-          template_file: victoria.conf.j2
+          template_file: {{ playbook_dir }}/templates/victoria.conf.j2
           deployment_location: /etc/nginx/conf.d/victoria.conf
           backup: false
         nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
