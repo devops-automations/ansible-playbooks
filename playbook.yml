@@ -48,3 +48,16 @@
         name: "victoria-metrics.{{ ec2_instance_tags.USERDATA_VICTORIA_METRICS }}"
       when: ec2_instance_tags.USERDATA_VICTORIA_METRICS is defined
 
+    - name: Include Nginx role dynamically
+      include_role:
+        name: nginx
+      when: ec2_instance_tags.USERDATA_NGINX_VERSION is defined
+
+      vars:
+        nginx_config_template_enable: true
+        nginx_config_template:
+          template_file: victoria.conf.j2
+          deployment_location: /etc/nginx/conf.d/victoria.conf
+          backup: false
+        nginx_version: "{{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
+

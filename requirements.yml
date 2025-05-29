@@ -3,3 +3,8 @@
   src: https://github.com/devops-automations/ansible-role-victoria-metrics.vmsingle
   version: main
   scm: git
+
+- name: nginx
+  src: https://github.com/nginx/ansible-role-nginx
+  version: main
+  scm: git
