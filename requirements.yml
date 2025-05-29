@@ -1,0 +1,5 @@
+---
+- name: victoria-metrics.vmsingle
+  src: https://github.com/devops-automations/ansible-role-victoria-metrics.vmsingle
+  version: main
+  scm: git
