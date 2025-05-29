@@ -59,7 +59,5 @@
           template_file: victoria.conf.j2
           deployment_location: /etc/nginx/conf.d/victoria.conf
           backup: false
-        nginx_version: "{{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
-        nginx_branch: mainline
-        nginx_manage_repo: true
-        nginx_install_from: nginx_repository
+        nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
+
