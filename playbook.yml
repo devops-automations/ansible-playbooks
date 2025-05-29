@@ -60,7 +60,7 @@
 
     - name: Include NGINX config role if NGINX version is set
       include_role:
-        name: nginx_config
+        name: nginx-config
       when: ec2_instance_tags.USERDATA_NGINX_VERSION is defined
 
       vars:
