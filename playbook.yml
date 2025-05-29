@@ -54,10 +54,18 @@
       when: ec2_instance_tags.USERDATA_NGINX_VERSION is defined
 
       vars:
-        nginx_config_template_enable: true
-        nginx_config_template:
-          template_file: {{ playbook_dir }}/templates/victoria.conf.j2
-          deployment_location: /etc/nginx/conf.d/victoria.conf
-          backup: false
         nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
+        nginx_config:
+          content: |
+            server {
+                listen 80;
+                server_name _;
+                location / {
+                    proxy_pass http://localhost:8428;
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                }
+            }
+          filename: victoria.conf
 
