@@ -56,7 +56,6 @@
       vars:
         nginx_type: opensource
         nginx_branch: mainline
-        nginx_version: "={{ ec2_instance_tags.USERDATA_NGINX_VERSION }}"
 
     - name: Copy static config
       when: ec2_instance_tags.USERDATA_NGINX is defined and ec2_instance_tags.USERDATA_NGINX | bool
