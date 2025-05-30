@@ -13,3 +13,8 @@
   src: https://github.com/nginx/ansible-role-nginx-config.git
   version: main
   scm: git
+
+- name: certbot
+  src: https://github.com/brunobenchimol/ansible-role-certbot-dns
+  version: main
+  scm: git

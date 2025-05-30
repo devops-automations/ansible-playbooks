@@ -3,8 +3,26 @@
   hosts: all
   gather_facts: true
   become: true
-  tasks:
-    # Start Tasks to gather tags from metadata
+  vars:
+    certbot_domain: "vmetrics.nuxbet.net"
+    certbot_generate_certificate: true
+#    certbot_admin_email: "h.merkieiev@nuxgame.com"
+    certbot_auto_renew: true
+    certbot_testmode: false
+    certbot_delete_certs: false
+    certbot_create_if_missing: true
+
+    certbot_dns_plugin: cloudflare
+    certbot_dns_api_token: "{{ lookup('env', 'CF_API_TOKEN') }}"
+
+    certbot_certs:
+      - domains:
+          - "{{ certbot_domain }}"
+
+    certbot_create_reload_services:
+      - nginx
+
+  pre_tasks:
     - name: Get EC2 metadata token
       shell: >
         curl -X PUT "http://169.254.169.254/latest/api/token"
@@ -41,8 +59,20 @@
       debug:
         var: ec2_instance_tags
 
-    # End Tasks to gather tags from metadata
+    - name: Create Cloudflare credentials file
+      copy:
+        dest: /root/.cloudflare.ini
+        content: |
+          dns_cloudflare_api_token = {{ certbot_dns_api_token }}
+        owner: root
+        group: root
+        mode: '0600'
 
+  roles:
+    - role: certbot
+      when: ec2_instance_tags.USERDATA_NGINX is defined and ec2_instance_tags.USERDATA_NGINX | bool
+
+  tasks:
     - name: Include VictoriaMetrics role dynamically
       include_role:
         name: "victoria-metrics.{{ ec2_instance_tags.USERDATA_VICTORIA_METRICS }}"
@@ -52,7 +82,6 @@
       include_role:
         name: nginx
       when: ec2_instance_tags.USERDATA_NGINX is defined and ec2_instance_tags.USERDATA_NGINX | bool
-
       vars:
         nginx_type: opensource
         nginx_branch: mainline
@@ -63,7 +92,20 @@
         content: |
           server {
               listen 80;
-              server_name _;
+              server_name {{ certbot_domain }};
+              return 301 https://$host$request_uri;
+          }
+
+          server {
+              listen 443 ssl;
+              server_name {{ certbot_domain }};
+
+              ssl_certificate /etc/letsencrypt/live/{{ certbot_domain }}/fullchain.pem;
+              ssl_certificate_key /etc/letsencrypt/live/{{ certbot_domain }}/privkey.pem;
+
+              ssl_protocols TLSv1.2 TLSv1.3;
+              ssl_ciphers HIGH:!aNULL:!MD5;
+
               location / {
                   proxy_pass http://localhost:8428;
                   proxy_set_header Host $host;
