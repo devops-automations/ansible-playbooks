@@ -59,15 +59,6 @@
       debug:
         var: ec2_instance_tags
 
-    - name: Create Cloudflare credentials file
-      copy:
-        dest: /root/.cloudflare.ini
-        content: |
-          dns_cloudflare_api_token = {{ certbot_dns_api_token }}
-        owner: root
-        group: root
-        mode: '0600'
-
   roles:
     - role: certbot
       when: ec2_instance_tags.USERDATA_NGINX is defined and ec2_instance_tags.USERDATA_NGINX | bool
