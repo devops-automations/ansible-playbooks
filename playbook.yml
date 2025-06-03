@@ -6,7 +6,7 @@
   vars:
     certbot_domain: "vmetrics.nuxbet.net"
     certbot_generate_certificate: true
-#    certbot_admin_email: "h.merkieiev@nuxgame.com"
+    certbot_admin_email: "no-reply@nuxgame.com"
     certbot_auto_renew: true
     certbot_testmode: false
     certbot_delete_certs: false
